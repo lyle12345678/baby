@@ -17,7 +17,6 @@ with st.form("add_record_form", clear_on_submit=True):
         day_num = st.number_input("🔢 第幾天嘗試 *", min_value=1, max_value=365, value=1, step=1)
 
     food_name = st.text_input("🥕 食材名稱 *", placeholder="例如：紅蘿蔔泥")
-
     amount_ml = st.number_input("🥄 單次份量 (ml) *", min_value=1, max_value=500, value=10, step=1)
 
     st.markdown("⭐ 寶寶喜好度")
@@ -36,6 +35,9 @@ with st.form("add_record_form", clear_on_submit=True):
         height=100,
     )
 
+    food_photo  = st.file_uploader("🍱 食物照片（選填）", type=["jpg", "jpeg", "png"], key="food_photo")
+    poop_photo  = st.file_uploader("💩 排便照片（選填）", type=["jpg", "jpeg", "png"], key="poop_photo")
+
     submitted = st.form_submit_button("💾 儲存紀錄", use_container_width=True, type="primary")
 
 if submitted:
@@ -44,14 +46,21 @@ if submitted:
         st.stop()
 
     try:
-        from utils.google_sheet import append_record
+        from utils.google_sheet import append_record, upload_photo
+
+        with st.spinner("上傳照片中…"):
+            food_url = upload_photo(food_photo, prefix=f"{record_date.isoformat()}_{food_name}_food")
+            poop_url = upload_photo(poop_photo, prefix=f"{record_date.isoformat()}_{food_name}_poop")
+
         append_record(
-            date_str   = record_date.isoformat(),
-            food       = food_name,
-            day        = int(day_num),
-            amount     = int(amount_ml),
-            preference = preference,
-            note       = note,
+            date_str       = record_date.isoformat(),
+            food           = food_name,
+            day            = int(day_num),
+            amount         = int(amount_ml),
+            preference     = preference,
+            note           = note,
+            food_photo_url = food_url,
+            poop_photo_url = poop_url,
         )
         st.success(f"✅ 已儲存「{food_name}」的第 {day_num} 天紀錄！{MOOD_OPTIONS[preference]}")
         st.balloons()
