@@ -1,12 +1,19 @@
-"""pages/1_add_record.py — 新增副食品紀錄"""
+"""pages/2_add_record.py — 新增副食品紀錄"""
 import streamlit as st
 from datetime import date
 import sys, os
 sys.path.append(os.path.join(os.path.dirname(__file__), ".."))
 
 st.set_page_config(page_title="新增紀錄", page_icon="➕", layout="centered")
-
 st.title("➕ 新增副食品紀錄")
+
+MOOD_OPTIONS = {
+    1: "😭 非常排斥",
+    2: "😟 不太喜歡",
+    3: "😐 普通",
+    4: "😊 喜歡",
+    5: "😍 非常喜歡",
+}
 
 with st.form("add_record_form", clear_on_submit=True):
     col1, col2 = st.columns(2)
@@ -16,15 +23,18 @@ with st.form("add_record_form", clear_on_submit=True):
         day_num = st.number_input("🔢 第幾天嘗試 *", min_value=1, max_value=365, value=1, step=1)
 
     food_name = st.text_input("🥕 食材名稱 *", placeholder="例如：紅蘿蔔泥")
-    amount    = st.text_input("🥄 單次份量 *", placeholder="例如：15ml 或 2 湯匙")
 
-    preference = st.slider(
-        "⭐ 寶寶喜好度（1 ～ 5）",
-        min_value=1, max_value=5, value=3,
-        help="1 = 非常排斥，5 = 非常喜歡",
+    amount_ml = st.number_input("🥄 單次份量 (ml) *", min_value=1, max_value=500, value=10, step=1)
+
+    st.markdown("⭐ 寶寶喜好度")
+    preference = st.radio(
+        "喜好度",
+        options=list(MOOD_OPTIONS.keys()),
+        format_func=lambda x: MOOD_OPTIONS[x],
+        index=2,
+        horizontal=True,
+        label_visibility="collapsed",
     )
-    stars_preview = "⭐" * preference + "☆" * (5 - preference)
-    st.caption(f"目前喜好度：{stars_preview}")
 
     note = st.text_area(
         "📝 食用後狀況（選填）",
@@ -35,13 +45,11 @@ with st.form("add_record_form", clear_on_submit=True):
     submitted = st.form_submit_button("💾 儲存紀錄", use_container_width=True, type="primary")
 
 if submitted:
-    # 驗證必填
     if not food_name.strip():
         st.error("請填寫食材名稱！")
         st.stop()
-    if not amount.strip():
-        st.error("請填寫單次份量！")
-        st.stop()
+
+    amount_str = f"{int(amount_ml)}ml"
 
     try:
         from utils.google_sheet import append_record
@@ -49,11 +57,11 @@ if submitted:
             date_str   = record_date.isoformat(),
             food       = food_name,
             day        = int(day_num),
-            amount     = amount,
+            amount     = amount_str,
             preference = preference,
             note       = note,
         )
-        st.success(f"✅ 已儲存「{food_name}」的第 {day_num} 天紀錄！")
+        st.success(f"✅ 已儲存「{food_name}」的第 {day_num} 天紀錄！{MOOD_OPTIONS[preference]}")
         st.balloons()
     except Exception as e:
         st.error(f"儲存失敗：{e}")
