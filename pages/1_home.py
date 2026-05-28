@@ -24,16 +24,19 @@ else:
 st.divider()
 st.subheader("📋 最近紀錄")
 
+MOOD = {1:"😭", 2:"😟", 3:"😐", 4:"😊", 5:"😍"}
+
 if records:
     for r in records[-5:][::-1]:
-        pref  = r.get("喜好度","")
-        stars = "⭐" * int(pref) if str(pref).isdigit() else ""
-        note  = r.get("食用後狀況","")
+        pref  = r.get("喜好度", "")
+        mood  = MOOD.get(int(pref), "") if str(pref).isdigit() else ""
+        note  = str(r.get("食用後狀況", ""))
         note_display = f" ｜ {note[:20]}{'…' if len(note)>20 else ''}" if note else ""
+        amount = r.get("單次份量", "-")
         st.markdown(
             f"**{r.get('食材','-')}**　{r.get('日期','-')}　"
-            f"第 {r.get('天數','-')} 天　{r.get('單次份量','-')}　"
-            f"{stars}{note_display}"
+            f"第 {r.get('天數','-')} 天　{amount} ml　"
+            f"{mood}{note_display}"
         )
 else:
     st.info("尚無紀錄，請至「新增紀錄」頁面開始記錄。")
