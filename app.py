@@ -85,11 +85,7 @@ else:
 st.divider()
 
 # ── 快速新增按鈕 ──────────────────────────────────────────
-col1, col2 = st.columns(2)
-with col1:
-    st.page_link("pages/1_add_record.py", label="➕ 快速新增紀錄", use_container_width=True)
-with col2:
-    st.page_link("pages/3_analysis.py", label="📊 查看分析圖表", use_container_width=True)
+st.info("👈 請使用左側選單切換頁面")
 
 
 # ── 側邊欄選單說明 ────────────────────────────────────────
