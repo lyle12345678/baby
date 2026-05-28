@@ -7,13 +7,7 @@ sys.path.append(os.path.join(os.path.dirname(__file__), ".."))
 st.set_page_config(page_title="新增紀錄", page_icon="➕", layout="centered")
 st.title("➕ 新增副食品紀錄")
 
-MOOD_OPTIONS = {
-    1: "😭 非常排斥",
-    2: "😟 不太喜歡",
-    3: "😐 普通",
-    4: "😊 喜歡",
-    5: "😍 非常喜歡",
-}
+MOOD_OPTIONS = {1: "😭", 2: "😟", 3: "😐", 4: "😊", 5: "😍"}
 
 with st.form("add_record_form", clear_on_submit=True):
     col1, col2 = st.columns(2)
@@ -49,15 +43,13 @@ if submitted:
         st.error("請填寫食材名稱！")
         st.stop()
 
-    amount_str = f"{int(amount_ml)}ml"
-
     try:
         from utils.google_sheet import append_record
         append_record(
             date_str   = record_date.isoformat(),
             food       = food_name,
             day        = int(day_num),
-            amount     = amount_str,
+            amount     = int(amount_ml),
             preference = preference,
             note       = note,
         )
